@@ -11,12 +11,13 @@ List<Order> repo = [
     new Order(1, new DateTime(2025, 02, 10), "Phone", "Не работает", "Не включается", OrderStatus.InRepair, client, executors[0] ),
     new Order(2, new DateTime(2025, 02, 13), "TV", "Не работает", "Не включается", OrderStatus.WaitingForExecution, null, null )];
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddRazorPages();
-
+var builder = WebApplication.CreateBuilder();
+builder.Services.AddCors();
 var app = builder.Build();
+
+app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+string message = "";
 
 app.MapGet("/", () => "Hi");
 
