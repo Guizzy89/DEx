@@ -1,3 +1,16 @@
+using static UpdateOrderDTO;
+List<Executor> executors = new List<Executor>()
+            {
+                new Executor("Иван", "Иванов", "79161234567"),
+                new Executor("Петр", "Петров", "79201234568"),
+                new Executor("Сергей", "Сергеев", "79301345679")
+            };
+
+Client client = new Client("Виктор", "Викторов", "78912344556", "ghfjgh@gmail.com");
+List<Order> repo = [
+    new Order(1, new DateTime(2025, 02, 10), "Phone", "Не работает", "Не включается", OrderStatus.InRepair, client, executors[0] ),
+    new Order(2, new DateTime(2025, 02, 13), "TV", "Не работает", "Не включается", OrderStatus.WaitingForExecution, null, null )];
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,6 +30,8 @@ app.UseRouting();
 app.UseAuthorization();
 app.MapRazorPages();
 app.Run();
+
+
 
 public class Client
 {
@@ -125,6 +140,8 @@ public class Order
         }
     }
 }
+
+record class UpdateOrderDTO(int OrderNumber, OrderStatus Status, Client Client, Executor Executor, string Comment = "");
 
 public enum OrderStatus
 {
