@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using static UpdateOrderDTO;
 List<Executor> executors = new List<Executor>()
             {
@@ -20,16 +21,38 @@ app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(
 string message = "";
 
 app.MapGet("/", () => "Hi");
+app.MapGet("orders", (int param = 0) => 
+{ 
+    string buffer = message;
+    message = "";
+    if (param != 0)
+        return new {repo= repo.FindAll(x => x.OrderNumber == param), message = buffer};
+    return new {repo,  message = buffer};
+});
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-}
-app.UseStaticFiles();
-app.UseRouting();
-app.UseAuthorization();
-app.MapRazorPages();
+app.MapGet("create", ([AsParameters] Order dto) => repo.Add(dto));
+app.MapGet("Update", ([AsParameters] UpdateOrderDTO dto) => 
+{ 
+    var order = repo.Find(x => x.OrderNumber == dto.OrderNumber);
+    if (order == null)
+        return Results.NotFound();
+    if (dto.Status != order.Status)
+    {
+        order.Status = dto.Status;
+        message += $"Статус заявки №{order.OrderNumber} изменён\n";
+        if (order.Status == OrderStatus.WaitingForExecution)
+            message += $"Заявка № {order.OrderNumber} ожидает исполнителя\n";
+        if (order.Status == OrderStatus.InRepair)
+            message += $"Заявка № {order.OrderNumber} в ремонте\n";
+        if (order.Status == OrderStatus.ReadyToIssue)
+        {
+            message += $"Заявка № {order.OrderNumber} завершена и готова к выдаче\n";
+            order.EndDate = DateOnly.FromDateTime(DateTime.Now);
+        }   
+    }
+    return Results.Ok(order);
+});
+
 app.Run();
 
 
